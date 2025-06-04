@@ -261,6 +261,22 @@ function M.generate_prompts(opts)
                 is_dummy = true,
               }),
             })
+            -- START of code to add instructional message for linting errors
+            if diagnostics and #diagnostics > 0 then
+              local formatted_errors = {}
+              for _, diagnostic in ipairs(diagnostics) do
+                table.insert(formatted_errors, string.format("Error on line %s: %s (Source: %s)", diagnostic.lnum, diagnostic.message, diagnostic.source))
+              end
+              local errors_string = table.concat(formatted_errors, "\n")
+              local instructional_message = string.format("The previous code attempt resulted in the following linting errors:\n%s\nPlease analyze these issues and provide a corrected version of the code, ensuring all listed errors are resolved.", errors_string)
+              table.insert(history_messages, HistoryMessage:new({
+                role = "user",
+                content = instructional_message,
+              }, {
+                is_dummy = true,
+              }))
+            end
+            -- END of code to add instructional message for linting errors
           end
         end
       end
